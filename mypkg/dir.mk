@@ -1,5 +1,5 @@
 IMPORT_CPPFLAGS += $(patsubst %,-I%/include,$(IMPORT_TREES))
-IMPORT_CPPFLAGS += $(patsubst %,-I%/tools/pkg4c,$(IMPORT_TREES))
+IMPORT_CPPFLAGS += $(patsubst %,-I%/pkg/pkg4c,$(IMPORT_TREES))
 
 LIB_NAME := pkg
 LIB_VERSION  := ""

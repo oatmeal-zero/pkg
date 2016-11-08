@@ -4,12 +4,9 @@
 #include <time.h>
 #include <sys/time.h>
 #include "mypkg.h"
-#include "json/json.h"
 
 using namespace std;
 typedef unsigned long long myclock_t;
-int jsonarray2pkg(CMyPkg& pkg, Json::Value& json);
-int jsonobject2pkg(CMyPkg& pkg, Json::Value& json);
 
 inline myclock_t nowclock()
 {
@@ -18,171 +15,8 @@ inline myclock_t nowclock()
     return (myclock_t)tv.tv_sec * 1000 * 1000 + tv.tv_usec;
 }
 
-static void
-printValueTree(FILE* fout, Json::Value& value, const JSONCPP_STRING& path = ".") {
-    switch (value.type()) {
-        case Json::nullValue:
-            fprintf(fout, "%s=null\n", path.c_str());
-            break;
-        case Json::intValue:
-            fprintf(fout,
-                    "%s=%s\n",
-                    path.c_str(),
-                    Json::valueToString(value.asLargestInt()).c_str());
-            break;
-        case Json::uintValue:
-            fprintf(fout,
-                    "%s=%s\n",
-                    path.c_str(),
-                    Json::valueToString(value.asLargestUInt()).c_str());
-            break;
-        case Json::realValue:
-            fprintf(fout,
-                    "%s=%lf\n",
-                    path.c_str(),
-                    value.asDouble());
-            break;
-        case Json::stringValue:
-            fprintf(fout, "%s=\"%s\"\n", path.c_str(), value.asString().c_str());
-            break;
-        case Json::booleanValue:
-            fprintf(fout, "%s=%s\n", path.c_str(), value.asBool() ? "true" : "false");
-            break;
-        case Json::arrayValue: 
-            {
-                fprintf(fout, "%s=[]\n", path.c_str());
-                Json::ArrayIndex size = value.size();
-                for (Json::ArrayIndex index = 0; index < size; ++index) {
-                    static char buffer[16];
-                    snprintf(buffer, sizeof(buffer), "[%d]", index);
-                    printValueTree(fout, value[index], path + buffer);
-                }
-            } break;
-        case Json::objectValue: 
-            {
-                fprintf(fout, "%s={}\n", path.c_str());
-                Json::Value::Members members(value.getMemberNames());
-                JSONCPP_STRING suffix = *(path.end() - 1) == '.' ? "" : ".";
-                for (Json::Value::Members::iterator it = members.begin();
-                        it != members.end();
-                        ++it) {
-                    const JSONCPP_STRING name = *it;
-                    printValueTree(fout, value[name], path + suffix + name);
-                }
-            } break;
-        default:
-                                break;
-    }
-}
-
-int jsonarray2pkg(CMyPkg& pkg, Json::Value& json)
-{
-    Json::ArrayIndex size = json.size();
-    for (Json::ArrayIndex index = 0; index < size; ++index) {
-        if (json[index].type() == Json::objectValue)            
-        {
-            CMyPkg obj;
-            jsonobject2pkg(obj, json[index]);
-            pkg.appendVal(obj);
-        }
-        else if (json[index].type() == Json::arrayValue)            
-        {                
-            CMyPkg array;
-            jsonarray2pkg(array, json[index]);
-            pkg.appendVal(array);
-        }            
-        else if (json[index].type() == Json::stringValue)            
-        {                
-            pkg.appendVal(json[index].asCString());
-        }            
-        else if (json[index].type() == Json::realValue)            
-        {                
-            pkg.appendVal(json[index].asDouble());
-        }            
-        else if (json[index].type() == Json::uintValue)            
-        {                
-            pkg.appendVal(json[index].asUInt());
-        }            
-        else          
-        {                
-            pkg.appendVal(json[index].asInt());
-        }        
-    }
-
-    return 0;
-}
-
-int jsonobject2pkg(CMyPkg& pkg, Json::Value& json)
-{
-    Json::Value::Members mem = json.getMemberNames();        
-    for (auto iter = mem.begin(); iter != mem.end(); ++iter)        
-    {            
-        if (json[*iter].type() == Json::objectValue)            
-        {
-            CMyPkg obj;
-            jsonobject2pkg(obj, json[*iter]);
-            pkg[(*iter).c_str()] = obj;
-        }
-        else if (json[*iter].type() == Json::arrayValue)            
-        {                
-            CMyPkg array;
-            jsonarray2pkg(array, json[*iter]);
-            pkg[(*iter).c_str()] = array;
-        }            
-        else if (json[*iter].type() == Json::stringValue)            
-        {                
-            pkg[(*iter).c_str()] = json[*iter].asCString();
-        }            
-        else if (json[*iter].type() == Json::realValue)            
-        {                
-            pkg[(*iter).c_str()] = json[*iter].asDouble();
-        }            
-        else if (json[*iter].type() == Json::uintValue)            
-        {                
-            pkg[(*iter).c_str()] = json[*iter].asUInt();
-        }            
-        else          
-        {                
-            pkg[(*iter).c_str()] = json[*iter].asInt();
-        }        
-    }        
-
-    return 0;
-}
-
-int json2pkg(CMyPkg& pkg, Json::Value& json)
-{
-    if (json.type() == Json::objectValue) {
-        return jsonobject2pkg(pkg, json);
-    } else if (json.type() == Json::arrayValue) {
-        return jsonarray2pkg(pkg, json);
-    }
-    return -1;
-}
-
-int pkg2json(CMyPkg& pkg, Json::Value& json)
-{
-    return 0;
-}
-
 CMyPkg test_json(const char *file)
 {
-    /*
-    ifstream ifs;
-    ifs.open(file);
-    assert(ifs.is_open());
-
-    Json::Reader reader;
-    Json::Value root;
-    if (!reader.parse(ifs, root, false)) {
-        printf("无法解析json配置文件，请检查!\n");
-    }
-
-    CMyPkg pkg;
-    json2pkg(pkg, root);
-    pkg.print("++json2pkg++");
-    return pkg;
-    */
     CMyPkg pkg = CMyPkg::ParseJsonFromFile(file);
     pkg.print("++json2pkg++");
     return pkg;
