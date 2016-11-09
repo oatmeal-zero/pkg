@@ -82,3 +82,6 @@ typedef struct myprint
 #define MP_T_STRING     4
 #define MP_T_OBJECT     5
 
+int myprint_find(rb_root *root, object_t pkg);
+void myprint_set(rb_root *root, object_t pkg);
+void myprint_free(rb_root *root);

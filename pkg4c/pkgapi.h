@@ -8,6 +8,7 @@ struct mynode;
 struct myval_t;
 mypkg* mpnew();
 mypkg* mpdup(mypkg *rhs);
+size_t mpsize(mypkg *pkg);
 void mpfree(mypkg *pkg);
 void mpclear(mypkg *pkg);
 int mpexist(mypkg *pkg, const char *key);
@@ -74,6 +75,9 @@ mypkg* mpparse_json(const char *text);
 mypkg* mpparse_json_file(const char *file);
 void mpprint_json(mypkg *pkg);
 void mpprint_json_unformat(mypkg *pkg);
+// serializer
+int mppack(mypkg *pkg, char *data);
+int mpunpack(mypkg *pkg, const char *data, size_t len);
 
 #ifdef __cplusplus
 } // extern "C"

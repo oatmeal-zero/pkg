@@ -133,6 +133,24 @@ public:
     bool exist(const char* key);
 
     /*
+     * 序列化
+     * @buf 序列化字节缓冲区
+     * @return
+     * -1   失败
+     * >0   字节数
+     */
+    int pack(char *buf);
+    /*
+     * 反序列化
+     * @buf 字节缓冲区
+     * @len 字节长度
+     * @return
+     * -1   失败
+     * >0   字节数
+     */
+    int unpack(const char *buf, size_t len);
+
+    /*
      * CMyPkg迭代器开始
      */
     const Iterator begin() const;

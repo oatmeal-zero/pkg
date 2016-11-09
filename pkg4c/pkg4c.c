@@ -285,6 +285,17 @@ void mpfree(mypkg *pkg)
     zfree(pkg);
 }
 
+size_t mpsize(mypkg *pkg)
+{
+    size_t num = 0;
+    rb_node *node;
+    for (node = rb_first(&pkg->root); node; node = rb_next(node))
+    {
+        ++num;
+    }
+    return num;
+}
+
 void mpclear(mypkg *pkg)
 {
     myval_t *array = pkg->array.va;

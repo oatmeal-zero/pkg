@@ -289,6 +289,16 @@ bool CMyPkg::exist(const char* key)
 	return (mpexist(pkg, key) == 1);
 }
 
+int CMyPkg::pack(char *buf)
+{
+    return mppack(pkg, buf);
+}
+
+int CMyPkg::unpack(const char *buf, size_t len)
+{
+    return mpunpack(pkg, buf, len);
+}
+
 int CMyPkg::appendVal(char val)
 {
     return mpappendint(pkg, val);

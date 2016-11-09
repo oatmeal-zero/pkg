@@ -248,6 +248,25 @@ void test_cjson()
     pkg5.print_json();
 }
 
+void test_serialier(CMyPkg pkg)
+{
+    printf("test_serialier\n");
+    char buf[2048]{0};
+    pkg.addVal("key1", 123);
+    pkg.addVal("key2", 3.1415926);
+    pkg.addVal("key3", "C++STL(Standard Template Library,标准模板)是一次革命，但是学习如何用它却是一个挑战。");
+    pkg.appendVal(1);
+    pkg.appendVal(2);
+    pkg.appendVal(3);
+    int ret = pkg.pack(buf);
+    printf("ret:%d\n", ret);
+
+    CMyPkg pkg2;
+    int ret2 = pkg2.unpack(buf, ret);
+    printf("ret2:%d\n", ret2);
+    pkg2.print();
+}
+
 int main(int argc, char** argv)
 {
     myclock_t begin = nowclock();
@@ -287,6 +306,8 @@ int main(int argc, char** argv)
     test_json("test.json");
 
     test_cjson();
+
+    test_serialier(pkg);
 
     myclock_t end = nowclock();
     printf("test end. total cost millisecond(s):%llu\n", (end - begin));
