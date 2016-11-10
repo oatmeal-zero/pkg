@@ -1,0 +1,5 @@
+liblua5.2.so.0
+*.so
+*.o
+test
+*.log

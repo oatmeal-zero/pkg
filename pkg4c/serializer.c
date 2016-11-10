@@ -37,7 +37,7 @@
 /* Reverse memory bytes if arch is little endian. Given the conceptual
  * simplicity of the Lua build system we prefer check for endianess at runtime.
  * The performance difference should be acceptable. */
-void memrevifle(void *ptr, size_t len) {
+static void memrevifle(void *ptr, size_t len) {
     unsigned char   *p = (unsigned char *)ptr,
                     *e = (unsigned char *)p+len-1,
                     aux;
@@ -65,14 +65,14 @@ typedef struct mp_buf {
     size_t len, free;
 } mp_buf;
 
-mp_buf *mp_buf_new() {
+static mp_buf *mp_buf_new() {
     mp_buf *buf = zmalloc(sizeof(mp_buf));
     buf->b = NULL;
     buf->len = buf->free = 0;
     return buf;
 }
 
-void mp_buf_append(mp_buf *buf, const unsigned char *s, size_t len) {
+static void mp_buf_append(mp_buf *buf, const unsigned char *s, size_t len) {
     if (buf->free < len) {
         size_t newsize = (buf->len+len)*2;
         buf->b = zrealloc(buf->b, newsize);
@@ -83,7 +83,7 @@ void mp_buf_append(mp_buf *buf, const unsigned char *s, size_t len) {
     buf->free -= len;
 }
 
-void mp_buf_free(mp_buf *buf) {
+static void mp_buf_free(mp_buf *buf) {
     zfree(buf->b);
     zfree(buf);
 }
@@ -107,7 +107,7 @@ typedef struct mp_cur {
     int err;
 } mp_cur;
 
-void mp_cur_init(mp_cur *cursor, const unsigned char *s, size_t len) {
+static void mp_cur_init(mp_cur *cursor, const unsigned char *s, size_t len) {
     cursor->p = s;
     cursor->left = len;
     cursor->err = MP_CUR_ERROR_NONE;
@@ -127,7 +127,7 @@ void mp_cur_init(mp_cur *cursor, const unsigned char *s, size_t len) {
 
 /* ------------------------- Low level MP encoding -------------------------- */
 
-void mp_encode_bytes(mp_buf *buf, const unsigned char *s, size_t len) {
+static void mp_encode_bytes(mp_buf *buf, const unsigned char *s, size_t len) {
     unsigned char hdr[5];
     int hdrlen;
 
@@ -156,7 +156,7 @@ void mp_encode_bytes(mp_buf *buf, const unsigned char *s, size_t len) {
 }
 
 /* we assume IEEE 754 internal format for single and double precision floats. */
-void mp_encode_double(mp_buf *buf, double d) {
+static void mp_encode_double(mp_buf *buf, double d) {
     unsigned char b[9];
     float f = d;
 
@@ -174,7 +174,7 @@ void mp_encode_double(mp_buf *buf, double d) {
     }
 }
 
-void mp_encode_int(mp_buf *buf, integer_t n) {
+static void mp_encode_int(mp_buf *buf, integer_t n) {
     unsigned char b[9];
     int enclen;
 
@@ -246,7 +246,7 @@ void mp_encode_int(mp_buf *buf, integer_t n) {
     mp_buf_append(buf,b,enclen);
 }
 
-void mp_encode_array(mp_buf *buf, int64_t n) {
+static void mp_encode_array(mp_buf *buf, int64_t n) {
     unsigned char b[5];
     int enclen;
 
@@ -269,7 +269,7 @@ void mp_encode_array(mp_buf *buf, int64_t n) {
     mp_buf_append(buf,b,enclen);
 }
 
-void mp_encode_dict(mp_buf *buf, int64_t n) {
+static void mp_encode_dict(mp_buf *buf, int64_t n) {
     unsigned char b[5];
     int enclen;
 
@@ -294,23 +294,23 @@ void mp_encode_dict(mp_buf *buf, int64_t n) {
 
 /* --------------------------- pkg types encoding --------------------------- */
 
-void mp_encode_string(mp_buf *buf, sds val) {
+static void mp_encode_string(mp_buf *buf, sds val) {
     mp_encode_bytes(buf, (const unsigned char*)val, sdslen(val));
 }
 
-void mp_encode_bool(mp_buf *buf, int val) {
+static void mp_encode_bool(mp_buf *buf, int val) {
     unsigned char b = val ? 0xc3 : 0xc2;
     mp_buf_append(buf,&b,1);
 }
 
-void mp_encode_null(mp_buf *buf) {
+static void mp_encode_null(mp_buf *buf) {
     unsigned char b[1];
     b[0] = 0xc0;
     mp_buf_append(buf,b,1);
 }
 
-void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root);
-void mp_encode_value(myval_t val, mp_buf *buf, rb_root *root)
+static void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root);
+static void mp_encode_value(myval_t val, mp_buf *buf, rb_root *root)
 {
     switch (valtype(val)) {
         case MP_T_NIL:
@@ -334,7 +334,7 @@ void mp_encode_value(myval_t val, mp_buf *buf, rb_root *root)
     }
 }
 
-void mp_encode_node(mynode *node, mp_buf *buf, rb_root *root)
+static void mp_encode_node(mynode *node, mp_buf *buf, rb_root *root)
 {
     switch (valtype(node->val)) {
         case MP_T_NIL:
@@ -364,7 +364,7 @@ void mp_encode_node(mynode *node, mp_buf *buf, rb_root *root)
     }
 }
 
-void mp_encode_pkg_array(mypkg *pkg, mp_buf *buf, rb_root *root) {
+static void mp_encode_pkg_array(mypkg *pkg, mp_buf *buf, rb_root *root) {
     myval_t *array = pkg->array.va;
     u_short num = pkg->array.num;
     u_short idx = 0;
@@ -376,7 +376,7 @@ void mp_encode_pkg_array(mypkg *pkg, mp_buf *buf, rb_root *root) {
     }
 }
 
-void mp_encode_pkg_dict(mypkg *pkg, mp_buf *buf, rb_root *root) {
+static void mp_encode_pkg_dict(mypkg *pkg, mp_buf *buf, rb_root *root) {
     size_t num = mpsize(pkg);
     if (num > 0) {
         mp_encode_dict(buf, num);
@@ -390,7 +390,7 @@ void mp_encode_pkg_dict(mypkg *pkg, mp_buf *buf, rb_root *root) {
     }
 }
 
-void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root)
+static void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root)
 {
     if (myprint_find(root, pkg)) {
         mp_encode_null(buf);
@@ -404,12 +404,12 @@ void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root)
 
 /* ------------------------------- Decoding --------------------------------- */
 typedef void* (*set_val_func)(void *ud, myval_t val);
-void mp_decode_pkg_array(mypkg *pkg, mp_cur *c);
-void mp_decode_pkg_dict(mypkg *pkg, mp_cur *c);
+static void mp_decode_pkg_array(mypkg *pkg, mp_cur *c);
+static void mp_decode_pkg_dict(mypkg *pkg, mp_cur *c);
 
 /* Decode a Message Pack raw object pointed by the string cursor 'c' to
  * a Lua type, that is left as the only result on the stack. */
-void mp_decode_key(mypkg *pkg, mp_cur *c, myval_t **v) {
+static void mp_decode_key(mypkg *pkg, mp_cur *c, myval_t **v) {
     mp_cur_need(c,1);
     switch(c->p[0]) {
     case 0xd9:  /* raw 8 */
@@ -461,7 +461,7 @@ void mp_decode_key(mypkg *pkg, mp_cur *c, myval_t **v) {
     }
 }
 
-void mp_decode_type(mypkg *pkg, mp_cur *c, set_val_func set_func, void *ext) {
+static void mp_decode_type(mypkg *pkg, mp_cur *c, set_val_func set_func, void *ext) {
     mp_cur_need(c,1);
     myval_t val;
     switch(c->p[0]) {
@@ -662,7 +662,7 @@ void mp_decode_type(mypkg *pkg, mp_cur *c, set_val_func set_func, void *ext) {
     set_func(ext, val);
 }
 
-void* append_val(void *ud, myval_t val)
+static void* append_val(void *ud, myval_t val)
 {
     mypkg *pkg = (mypkg*)ud;
     myval_t *v = mpappendnil(pkg);
@@ -670,21 +670,14 @@ void* append_val(void *ud, myval_t val)
     return NULL;
 }
 
-void* add_key(void *ud, myval_t val)
-{
-    mypkg *pkg = (mypkg*)ud;
-    const char* key = sdsval(val);
-    return mpaddnil(pkg, key);
-}
-
-void* assigned_val(void *ud, myval_t val)
+static void* assigned_val(void *ud, myval_t val)
 {
     myval_t *v = (myval_t*)ud;
     *v = val;
     return NULL;
 }
 
-void mp_decode_pkg_array(mypkg *pkg, mp_cur *c)
+static void mp_decode_pkg_array(mypkg *pkg, mp_cur *c)
 {
     size_t idx = 0;
     size_t len = 0;
@@ -727,7 +720,7 @@ void mp_decode_pkg_array(mypkg *pkg, mp_cur *c)
     }
 }
 
-void mp_decode_pkg_dict(mypkg *pkg, mp_cur *c)
+static void mp_decode_pkg_dict(mypkg *pkg, mp_cur *c)
 {
     size_t idx = 0;
     size_t len = 0;
@@ -772,7 +765,7 @@ void mp_decode_pkg_dict(mypkg *pkg, mp_cur *c)
     }
 }
 
-void mp_decode_pkg(mypkg *pkg, mp_cur *c)
+static void mp_decode_pkg(mypkg *pkg, mp_cur *c)
 {
     mp_decode_pkg_array(pkg, c);
     mp_decode_pkg_dict(pkg, c);
