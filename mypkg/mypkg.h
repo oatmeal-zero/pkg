@@ -36,6 +36,22 @@ struct mypkg;
 struct myiter;
 struct myval_t;
 
+class CMyBuffer
+{
+    friend class CMyPkg;
+public:
+    CMyBuffer();
+    CMyBuffer(const char *init);
+    CMyBuffer(const char *init, size_t initlen);
+    ~CMyBuffer();
+public:
+    const char* c_str() const;
+    size_t size() const;
+private:
+    CMyBuffer& operator=(char *buf);
+    char *buf;
+};
+
 class CMyPkg
 {
 public:
@@ -139,7 +155,7 @@ public:
      * -1   失败
      * >0   字节数
      */
-    int pack(char *buf);
+    int pack(CMyBuffer& buf);
     /*
      * 反序列化
      * @buf 字节缓冲区
@@ -148,6 +164,7 @@ public:
      * -1   失败
      * >0   字节数
      */
+    int unpack(const CMyBuffer& buf);
     int unpack(const char *buf, size_t len);
 
     /*

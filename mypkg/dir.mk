@@ -3,7 +3,7 @@ IMPORT_CPPFLAGS += $(patsubst %,-I%/pkg/pkg4c,$(IMPORT_TREES))
 
 LIB_NAME := pkg
 LIB_VERSION  := ""
-LIB_OBJS := CMyPkg.o  util.o
+LIB_OBJS := CMyPkg.o  util.o buffer.o
 
 all:: mkshared
 

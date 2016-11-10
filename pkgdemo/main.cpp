@@ -251,7 +251,7 @@ void test_cjson()
 void test_serialier(CMyPkg pkg)
 {
     printf("test_serialier\n");
-    char buf[2048]{0};
+    CMyBuffer buf;
     pkg.addVal("key1", 123);
     pkg.addVal("key2", 3.1415926);
     pkg.addVal("key3", "C++STL(Standard Template Library,标准模板)是一次革命，但是学习如何用它却是一个挑战。");
@@ -262,9 +262,14 @@ void test_serialier(CMyPkg pkg)
     printf("ret:%d\n", ret);
 
     CMyPkg pkg2;
-    int ret2 = pkg2.unpack(buf, ret);
+    int ret2 = pkg2.unpack(buf.c_str(), buf.size());
     printf("ret2:%d\n", ret2);
     pkg2.print();
+
+    CMyPkg pkg3;
+    int ret3 = pkg3.unpack(buf);
+    printf("ret3:%d\n", ret3);
+    pkg3.print();
 }
 
 int main(int argc, char** argv)

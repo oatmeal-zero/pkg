@@ -779,16 +779,17 @@ void mp_decode_pkg(mypkg *pkg, mp_cur *c)
 }
 
 /// api
-int mppack(mypkg *pkg, char *data)
+char* mppack(mypkg *pkg)
 {
     mp_buf *buf = mp_buf_new();
     rb_root root = RB_ROOT;
     mp_encode_pkg(buf, pkg, &root);
     myprint_free(&root);
-    size_t len = buf->len;
-    memcpy(data, buf->b, len);
+
+    sds data = sdsnewlen(buf->b, buf->len);
     mp_buf_free(buf);
-    return len;
+
+    return data;
 }
 
 int mpunpack(mypkg *pkg, const char *data, size_t len)

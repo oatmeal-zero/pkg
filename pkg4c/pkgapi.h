@@ -76,8 +76,15 @@ mypkg* mpparse_json_file(const char *file);
 void mpprint_json(mypkg *pkg);
 void mpprint_json_unformat(mypkg *pkg);
 // serializer
-int mppack(mypkg *pkg, char *data);
+char* mppack(mypkg *pkg);
 int mpunpack(mypkg *pkg, const char *data, size_t len);
+// buffer
+char* mbnew(const char *init);
+char* mbnewlen(const void *init, size_t initlen);
+char* mbempty();
+void mbfree(char* buf);
+size_t mbsize(char* buf);
+const char* mbcstr(char* buf);
 
 #ifdef __cplusplus
 } // extern "C"

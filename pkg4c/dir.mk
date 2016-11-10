@@ -3,7 +3,7 @@ IMPORT_CPPFLAGS += -Wall
 
 LIB_NAME := pkg4c
 LIB_VERSION  := ""
-LIB_OBJS := pkg4c.o rbtree.o sds.o zmalloc.o cJSON.o json_pkg.o serializer.o
+LIB_OBJS := pkg4c.o rbtree.o sds.o zmalloc.o cJSON.o json_pkg.o serializer.o buffer.o
 
 all:: mkstatic
 
