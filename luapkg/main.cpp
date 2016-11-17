@@ -6,6 +6,21 @@
 #include "mypkg.h"
 #include "lua.hpp"
 
+void test_case(lua_State *L)
+{
+    CMyPkg pkg = CMyPkg::ParseJsonFromFile("test.json");
+    pkg.print();
+    CMyBuffer buf;
+    pkg.pack(buf);
+
+    lua_getglobal(L, "test");    // 获取lua函数
+    lua_pushlstring(L, buf.c_str(), buf.size());        // 压入参数
+    if (lua_pcall(L, 1, 0, 0) != 0) {
+        printf("got an exception: %s", lua_tostring(L, -1));
+        return;
+    }
+}
+
 void test_msg(lua_State *L)
 {
     CMyPkg pkg;
@@ -16,15 +31,18 @@ void test_msg(lua_State *L)
     pkg2.appendVal("lua_pushthread");
     pkg2.appendVal("lua_pushnumber");
     pkg["pkg"] = pkg2;
+    pkg["emptypkg"] = CMyPkg();
     pkg.print("origin pkg content");
 
     CMyBuffer buf;
     pkg.pack(buf);
 
+    printf("c msg len: %lu\n", buf.size());
     lua_getglobal(L, "test");    // 获取lua函数
     lua_pushlstring(L, buf.c_str(), buf.size());        // 压入参数
     if (lua_pcall(L, 1, 0, 0) != 0) {
         printf("got an exception: %s", lua_tostring(L, -1));
+        return;
     }
 }
 
@@ -60,8 +78,10 @@ int main()
         return -1;
     }
 
+    test_case(L);
     test_msg(L);
     test_msg2(L);
 
+    lua_close(L);
     return 0;
 }

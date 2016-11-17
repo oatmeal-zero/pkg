@@ -364,7 +364,7 @@ static void mp_encode_node(mynode *node, mp_buf *buf, rb_root *root)
     }
 }
 
-static void mp_encode_pkg_array(mypkg *pkg, mp_buf *buf, rb_root *root) {
+static int mp_encode_pkg_array(mypkg *pkg, mp_buf *buf, rb_root *root) {
     myval_t *array = pkg->array.va;
     u_short num = pkg->array.num;
     u_short idx = 0;
@@ -374,9 +374,10 @@ static void mp_encode_pkg_array(mypkg *pkg, mp_buf *buf, rb_root *root) {
             mp_encode_value(array[idx], buf, root);
         }
     }
+    return num;
 }
 
-static void mp_encode_pkg_dict(mypkg *pkg, mp_buf *buf, rb_root *root) {
+static int mp_encode_pkg_dict(mypkg *pkg, mp_buf *buf, rb_root *root) {
     size_t num = mpsize(pkg);
     if (num > 0) {
         mp_encode_dict(buf, num);
@@ -388,6 +389,7 @@ static void mp_encode_pkg_dict(mypkg *pkg, mp_buf *buf, rb_root *root) {
             mp_encode_node(n, buf, root);
         }
     }
+    return num;
 }
 
 static void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root)
@@ -398,8 +400,11 @@ static void mp_encode_pkg(mp_buf *buf, mypkg *pkg, rb_root *root)
     }
     myprint_set(root, pkg);
 
-    mp_encode_pkg_array(pkg, buf, root);
-    mp_encode_pkg_dict(pkg, buf, root);
+    int array_num = mp_encode_pkg_array(pkg, buf, root);
+    int dict_num = mp_encode_pkg_dict(pkg, buf, root);
+    if (array_num == 0 && dict_num == 0) {
+        mp_encode_null(buf);
+    }
 }
 
 /* ------------------------------- Decoding --------------------------------- */
