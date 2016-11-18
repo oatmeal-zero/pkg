@@ -288,3 +288,17 @@ void mpprint_json_unformat(mypkg *pkg)
         cJSON_Delete(root);
     }
 }
+
+char* mpgen_json(mypkg *pkg)
+{
+    cJSON *root = gen_json(pkg);
+    if (root) {
+        char *out = cJSON_PrintUnformatted(root);
+        sds data = sdsnew(out);
+        free(out);
+        cJSON_Delete(root);
+        return data;
+    }
+    return NULL;
+}
+

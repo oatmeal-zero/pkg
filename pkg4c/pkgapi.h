@@ -75,6 +75,7 @@ mypkg* mpparse_json(const char *text);
 mypkg* mpparse_json_file(const char *file);
 void mpprint_json(mypkg *pkg);
 void mpprint_json_unformat(mypkg *pkg);
+char* mpgen_json(mypkg *pkg);
 // serializer
 char* mppack(mypkg *pkg);
 int mpunpack(mypkg *pkg, const char *data, size_t len);

@@ -295,6 +295,12 @@ int CMyPkg::pack(CMyBuffer& buf)
     return buf.size();
 }
 
+int CMyPkg::pack_json(CMyBuffer& buf)
+{
+    buf = mpgen_json(pkg);
+    return buf.size();
+}
+
 int CMyPkg::unpack(const CMyBuffer& buf)
 {
     return mpunpack(pkg, buf.c_str(), buf.size());

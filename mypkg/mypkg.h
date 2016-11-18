@@ -156,6 +156,7 @@ public:
      * >0   字节数
      */
     int pack(CMyBuffer& buf);
+    int pack_json(CMyBuffer& buf);
     /*
      * 反序列化
      * @buf 字节缓冲区
