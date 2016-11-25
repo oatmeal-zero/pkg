@@ -73,7 +73,7 @@ CMyPkg::CMyPkg()
 
 CMyPkg::CMyPkg(mypkg *pkg)
 {
-    this->pkg = pkg;
+    this->pkg = mpdup(pkg);
 }
 
 CMyPkg::CMyPkg(const CMyPkg& rhs)
