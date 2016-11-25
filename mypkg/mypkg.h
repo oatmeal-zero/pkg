@@ -184,6 +184,7 @@ public:
     int addVal(const char *key, u_int val);
     int addVal(const char *key, u_long val);
     int addVal(const char *key, integer_t val);
+    int addPointer(const char *key, void *val);
     // add number
     int addVal(const char *key, float val);
     int addVal(const char *key, number_t val);
@@ -223,6 +224,7 @@ public:
     // get 
     Proxy getVal(const char *key) const;
     Proxy getVal(int index) const;
+    void* getPointer(const char *key) const;
     const char* getString(const char *key, size_t &len) const;
     int getArraySize() const;
 

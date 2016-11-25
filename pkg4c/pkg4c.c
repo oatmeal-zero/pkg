@@ -783,6 +783,14 @@ const char* mpgetstring(mypkg *pkg, const char *key)
     return sdsval(node->val);
 }
 
+integer_t mpgetintger(mypkg *pkg, const char *key)
+{
+    mynode *node = mynode_search(&pkg->root, key);
+    if (node == NULL) return 0;
+
+    return intval(node->val);
+}
+
 const char* mpgetlstring(mypkg *pkg, const char *key, size_t *len)
 {
     *len = 0;

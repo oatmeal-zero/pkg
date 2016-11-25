@@ -180,6 +180,11 @@ int CMyPkg::addVal(const char *key, integer_t val)
     return mpaddinteger(pkg, key, val);
 }
 
+int CMyPkg::addPointer(const char *key, void *val)
+{
+    return mpaddinteger(pkg, key, (integer_t)val);
+}
+
 int CMyPkg::addVal(const char *key, float val)
 {
     return mpaddnumber(pkg, key, val);
@@ -253,6 +258,12 @@ Proxy CMyPkg::getVal(const char *key) const
 Proxy CMyPkg::getVal(int index) const
 {
     return Proxy(mpgetaval(pkg, index));
+}
+
+void* CMyPkg::getPointer(const char *key) const
+{
+    integer_t val = mpgetintger(pkg, key);
+    return (void*)val;
 }
 
 Proxy CMyPkg::operator[](const char* key) 

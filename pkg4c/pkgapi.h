@@ -58,6 +58,7 @@ void mpsetvalstr(myval_t *lhs, const char *val, size_t len);
 // get string
 const char* mpgetstring(mypkg *pkg, const char *key);
 const char* mpgetlstring(mypkg *pkg, const char *key, size_t *len);
+integer_t mpgetintger(mypkg *pkg, const char *key);
 int mpgetarraylen(mypkg *pkg);
 // del node
 int mpdelnode(mypkg *pkg, const char *key);
