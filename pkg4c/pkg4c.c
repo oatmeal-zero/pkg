@@ -118,9 +118,10 @@ void myprint_set(rb_root *root, object_t pkg)
 void myprint_free(rb_root *root)
 {
     rb_node *node;
-    for (node = rb_first(root); node; node = rb_next(node))
+    for (node = rb_first(root); node; )
     {
         myprint *n = rb_entry(node, myprint, node);
+        node = rb_next(node);
         rb_erase(&n->node, root);
         zfree(n);
     }
@@ -265,9 +266,10 @@ void mpfree(mypkg *pkg)
     if (--pkg->ref_count != 0) return;
 
     rb_node *node;
-    for (node = rb_first(&pkg->root); node; node = rb_next(node))
+    for (node = rb_first(&pkg->root); node; )
     {
         mynode *n = rb_entry(node, mynode, node);
+        node = rb_next(node); // 删除前先取出下一个节点
         rb_erase(&n->node, &pkg->root);
         nodefree(n);
     }
@@ -310,9 +312,10 @@ void mpclear(mypkg *pkg)
     pkg->array = ARRAY_ROOT;
 
     rb_node *node;
-    for (node = rb_first(&pkg->root); node; node = rb_next(node))
+    for (node = rb_first(&pkg->root); node; )
     {
         mynode *n = rb_entry(node, mynode, node);
+        node = rb_next(node);
         rb_erase(&n->node, &pkg->root);
         nodefree(n);
     }
