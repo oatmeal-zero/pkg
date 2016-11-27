@@ -577,6 +577,11 @@ Proxy::operator CMyPkg() const
     return CMyPkg(mpvalobj(val));
 }
 
+Proxy::operator CMyPkg*() const
+{
+    return new CMyPkg(mpvalobj(val));
+}
+
 Proxy& Proxy::operator=(char val)
 {
     mpsetvalint(this->val, val);

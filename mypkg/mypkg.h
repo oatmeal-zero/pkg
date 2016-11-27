@@ -97,6 +97,7 @@ public:
         operator float() const;
         operator number_t() const;
         operator CMyPkg() const;
+        operator CMyPkg*() const;
     public:
         void print(const char* msg = NULL) const;
         int type() const;
