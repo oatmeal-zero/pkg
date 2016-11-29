@@ -121,7 +121,9 @@ public:
         ~Iterator();
         bool operator!=(const Iterator &rhs);
         const Iterator& operator++();
+        int ktype() const;
         const char* key() const;
+        int ikey() const;
         Proxy getVal() const;
         const char* getString(size_t &len) const;
     public:

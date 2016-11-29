@@ -475,9 +475,19 @@ const Iterator& Iterator::operator++()
     return *this;
 }
 
+int Iterator::ktype() const
+{
+    return mpiterktype(iter);
+}
+
 const char* Iterator::key() const
 {
     return mpiterkey(iter);
+}
+
+int Iterator::ikey() const
+{
+    return mpiterindex(iter);
 }
 
 int Iterator::type() const

@@ -386,7 +386,22 @@ myiter* mpiternew(mypkg *pkg)
 {
     myiter *iter = zmalloc(sizeof(myiter));
     if (iter == NULL) return NULL;
+    iter->val = NULL;
     iter->node = rb_first(&pkg->root);
+
+    // array
+    if (pkg->array.num > 0) {
+        iter->val = pkg->array.va;
+        iter->index = 0;
+        iter->maxidx = pkg->array.num;
+        iter->type = MP_T_INTEGER;
+        return iter;
+    }
+
+    // dict
+    iter->index = -1;
+    iter->maxidx = pkg->array.num;
+    iter->type = MP_T_STRING;
     return iter;
 }
 
@@ -394,7 +409,11 @@ myiter* mpiterend()
 {
     myiter *iter = zmalloc(sizeof(myiter));
     if (iter == NULL) return NULL;
+    iter->val = NULL;
     iter->node = NULL;
+    iter->index = -1;
+    iter->maxidx = 0;
+    iter->type = MP_T_NIL;
     return iter;
 }
 
@@ -405,13 +424,43 @@ void mpiterfree(myiter *iter)
 
 void mpiternext(myiter *iter) 
 {
-    iter->node = rb_next(iter->node);
+    // array
+    if (iter->index >= 0) {
+        if (++iter->index < iter->maxidx) {
+            iter->val++;
+            return;
+        }
+
+        iter->val = NULL;
+        iter->index = -1;
+        iter->type = MP_T_STRING;
+        if (iter->node == NULL) {
+            iter->type = MP_T_NIL;
+        }
+        return;
+    }
+    
+    // dict
+    if (iter->node != NULL) {
+        iter->node = rb_next(iter->node);
+        if (iter->node == NULL) {
+            iter->type = MP_T_NIL;
+        }
+    }
     return;
 }
 
 int mpitercmp(myiter *lhs, myiter *rhs)
 {
-    return (lhs->node == rhs->node);
+    return (lhs->node == rhs->node
+            && lhs->val == rhs->val
+            && lhs->index == rhs->index
+            && lhs->type == rhs->type);
+}
+
+int mpiterktype(myiter *iter)
+{
+    return iter->type;
 }
 
 const char* mpiterkey(myiter *iter)
@@ -421,22 +470,39 @@ const char* mpiterkey(myiter *iter)
     return sdskey(node->key);
 }
 
+int mpiterindex(myiter *iter)
+{
+    return iter->index;
+}
+
 int mpitertype(myiter *iter)
 {
-    if (iter->node == NULL) return MP_T_NIL;
-    mynode *node = rb_entry(iter->node, mynode, node);
-    return valtype(node->val);
+    myval_t *val = NULL;
+    if (iter->type == MP_T_NIL) return MP_T_NIL;
+    if (iter->type == MP_T_STRING) {
+        mynode *node = rb_entry(iter->node, mynode, node);
+        val = &node->val;
+    } else {
+        val = iter->val;
+    }
+    return valtype(*val);
 }
 
 myval_t* mpiterval(myiter *iter, size_t *len)
 {
-    if (iter->node == NULL) return NULL;
-    mynode *node = rb_entry(iter->node, mynode, node);
-    if (valtype(node->val) == MP_T_STRING && len != NULL)
-    {
-        *len = sdslen(sdsval(node->val));
+    myval_t *val = NULL;
+    if (iter->type == MP_T_NIL) return NULL;
+    if (iter->type == MP_T_STRING) {
+        mynode *node = rb_entry(iter->node, mynode, node);
+        val = &node->val;
+    } else {
+        val = iter->val;
     }
-    return &node->val;
+
+    if (valtype(*val) ==  MP_T_STRING && len != NULL) {
+        *len = sdslen(sdsval(*val));
+    }
+    return val;
 }
 
 int mpaddstring(mypkg *pkg, const char *key, const char *val, size_t len)

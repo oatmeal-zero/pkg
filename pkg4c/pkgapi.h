@@ -68,7 +68,9 @@ myiter* mpiterend();
 void mpiterfree(myiter *iter);
 void mpiternext(myiter *iter);
 int mpitercmp(myiter *lhs, myiter *rhs);
+int mpiterktype(myiter *iter);
 const char* mpiterkey(myiter *iter);
+int mpiterindex(myiter *iter);
 int mpitertype(myiter *iter);
 myval_t* mpiterval(myiter *iter, size_t *len);
 // cjson api

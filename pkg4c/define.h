@@ -60,7 +60,11 @@ typedef struct mynode
 
 typedef struct myiter
 {
-    rb_node    *node;
+    myval_t    *val; // array
+    rb_node    *node;// dict
+    short       index;
+    u_short     maxidx;
+    type_t      type; // key type
 } myiter;
 
 typedef struct mypkg
