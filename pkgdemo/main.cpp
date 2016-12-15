@@ -188,23 +188,38 @@ void test_iterator(CMyPkg& pkg)
             case MP_T_INTEGER:
                 {
                     integer_t val = iter.getVal();
+                    if (iter.ktype() == MP_T_INTEGER) {
+                    printf("key:%d ival:%lld\n",
+                            iter.ikey(), val);
+                    } else {
                     printf("key:%s ival:%lld\n",
                             iter.key(), val);
+                    }
                     break;
                 }
             case MP_T_NUMBER:
                 {
                     number_t val = iter.getVal();
+                    if (iter.ktype() == MP_T_INTEGER) {
+                    printf("key:%d nval:%.8lf\n",
+                            iter.ikey(), val);
+                    } else {
                     printf("key:%s nval:%.8lf\n",
                             iter.key(), val);
+                    }
                     break;
                 }
             case MP_T_STRING:
                 {
                     size_t len;
                     const char* val = iter.getString(len);
+                    if (iter.ktype() == MP_T_INTEGER) {
+                    printf("key:%d sval:%s %lu\n",
+                            iter.ikey(), val, len);
+                    } else {
                     printf("key:%s sval:%s %lu\n",
                             iter.key(), val, len);
+                    }
                     break;
                 }
             case MP_T_OBJECT:
@@ -279,8 +294,20 @@ int main(int argc, char** argv)
     CMyPkg pkg;
     pkg.addVal("key", "hello, world!");
     pkg.addVal("number", 3.1415926);
-    pkg.addVal("copykey", pkg.getVal("key"));
+    pkg.addVal("integer", 123456);
+    pkg.appendVal(67890);
+    pkg.appendVal("string value");
+    pkg.appendVal(0.123);
 
+    CMyPkg pkg2;
+    pkg2.addVal("key", 123);
+    pkg.addVal("pkg", pkg2);
+
+    CMyPkg *tmp = pkg.getVal("pkg");
+    tmp->print("============");
+    delete tmp;
+    /*
+    pkg.addVal("copykey", pkg.getVal("key"));
     const char *notexist = pkg.getVal("copykey");
     printf("notexist:%s\n", notexist);
 
@@ -300,8 +327,10 @@ int main(int argc, char** argv)
     tmp.addVal("newkey", 1234567);
     tmp.print("tmp pkg print");
     pkg.print("*****************");
+    */
 
     test_iterator(pkg);
+    /*
     pkg.print();
 
     test_mypkg();
@@ -313,6 +342,7 @@ int main(int argc, char** argv)
     test_cjson();
 
     test_serialier(pkg);
+    */
 
     myclock_t end = nowclock();
     printf("test end. total cost millisecond(s):%llu\n", (end - begin));

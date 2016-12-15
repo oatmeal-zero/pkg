@@ -96,12 +96,16 @@ CMyPkg::~CMyPkg()
 
 CMyPkg CMyPkg::ParseJsonFromString(const char *text)
 {
-    return CMyPkg(mpparse_json(text));
+    mypkg *pkg = mpparse_json(text);
+    if (pkg != NULL) return CMyPkg(pkg);
+    return CMyPkg();
 }
 
 CMyPkg CMyPkg::ParseJsonFromFile(const char *file)
 {
-    return CMyPkg(mpparse_json_file(file));
+    mypkg *pkg = mpparse_json_file(file);
+    if (pkg != NULL) return CMyPkg(pkg);
+    return CMyPkg();
 }
 
 void CMyPkg::print_json() const
